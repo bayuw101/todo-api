@@ -33,7 +33,7 @@ app.delete('/todos/delete/:id', function(req, res){
 	var todoId = parseInt(req.params.id);
 	var matchTodo = _.findWhere(todos,{id:todoId});
 	if(!matchTodo){
-		res.send("Cannot find any data with those ID !");
+		res.send(404).json({"Cannot find any data with those ID !"});
 	}else{
 		todos = _.without(todos,matchTodo);
 		res.json(todos);
