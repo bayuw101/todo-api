@@ -18,7 +18,7 @@ app.get('/todos', function(req, res){
 	res.json(todos);
 });
 
-app.get('/todos/edit/:id', function(req, res){
+app.get('/todos/:id', function(req, res){
 	var todoId = parseInt(req.params.id);
 	var matchTodo = _.findWhere(todos,{id:todoId});
 
@@ -29,11 +29,11 @@ app.get('/todos/edit/:id', function(req, res){
 	};
 });
 
-app.delete('/todos/delete/:id', function(req, res){
+app.delete('/todos/:id', function(req, res){
 	var todoId = parseInt(req.params.id);
 	var matchTodo = _.findWhere(todos,{id:todoId});
 	if(!matchTodo){
-		res.send(404).json({"Cannot find any data with those ID !"});
+		res.send(404).json([]);
 	}else{
 		todos = _.without(todos,matchTodo);
 		res.json(todos);
@@ -50,6 +50,28 @@ app.post('/todos', function(req, res){
 	// push data
 	todos.push(body);
 	res.json(body);
+});
+
+app.put('/todos/:id', function(req, res){
+	var todoId = parseInt(req.params.id);
+	var body = _.pick(req.body, 'completed', 'description');
+	var matchTodo = _.findWhere(todos,{id:todoId});
+	var validAttributes = {};
+
+	if(!matchTodo){
+		res.status(404).send("Error while getting data !");
+	}else{
+		if(body.hasOwnProperty('completed') && _.isBoolean(body.completed) && body.hasOwnProperty('description') && body.description.trim().length > 0 && _.isString(body.description) ){
+			validAttributes.completed = body.completed;
+			validAttributes.description = body.description;
+			_.extend(matchTodo, validAttributes);
+			res.json(todos);
+		}else if(body.hasOwnProperty('completed') || body.hasOwnProperty('description')){
+			return res.status(400).send("Getting bad response !");
+		}else{
+			return res.status(404).send("Page not found !");
+		}
+	}
 });
 
 app.listen(PORT,function(){
