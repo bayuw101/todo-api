@@ -10,51 +10,61 @@ var todosId = 1;
 
 app.use(bodyParser.json());
 
-app.get('/', function(req, res){
+app.get('/', function(req, res) {
 	res.send('oke');
 });
-
-app.get('/todos', function(req, res){
+	
+app.get('/todos', function(req, res) {
 	var queryParams = req.query;
 	filteredTodos = todos;
-	if(queryParams.hasOwnProperty('completed') && queryParams.completed === "false" ){
-		filteredTodos = _.where(todos, {completed:false});
-	}else if((queryParams.hasOwnProperty('completed') && queryParams.completed === "true" )){
-		filteredTodos = _.where(todos, {completed:true});
+	if (queryParams.hasOwnProperty('completed') && queryParams.completed === "false") {
+		filteredTodos = _.where(todos, {
+			completed: false
+		});
+	} else if ((queryParams.hasOwnProperty('completed') && queryParams.completed === "true")) {
+		filteredTodos = _.where(todos, {
+			completed: true
+		});
 	}
 
-	if(queryParams.hasOwnProperty('q') && queryParams.q.length > 0){
-		filteredTodos = _.filter(todos, function(params){return params.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;});
+	if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0) {
+		filteredTodos = _.filter(todos, function(params) {
+			return params.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
+		});
 	}
-	
+
 	res.json(filteredTodos);
 });
 
-app.get('/todos/:id', function(req, res){
+app.get('/todos/:id', function(req, res) {
 	var todoId = parseInt(req.params.id);
-	var matchTodo = _.findWhere(todos,{id:todoId});
+	var matchTodo = _.findWhere(todos, {
+		id: todoId
+	});
 
-	if(matchTodo){
+	if (matchTodo) {
 		res.json(matchTodo);
-	}else{
+	} else {
 		res.status(404).send();
 	};
 });
 
-app.delete('/todos/:id', function(req, res){
+app.delete('/todos/:id', function(req, res) {
 	var todoId = parseInt(req.params.id);
-	var matchTodo = _.findWhere(todos,{id:todoId});
-	if(!matchTodo){
+	var matchTodo = _.findWhere(todos, {
+		id: todoId
+	});
+	if (!matchTodo) {
 		res.send(404).json([]);
-	}else{
-		todos = _.without(todos,matchTodo);
+	} else {
+		todos = _.without(todos, matchTodo);
 		res.json(todos);
 	}
 });
 
-app.post('/todos', function(req, res){
+app.post('/todos', function(req, res) {
 	var body = _.pick(req.body, 'completed', 'description');
-	if(!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0 ){
+	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
 		return res.status(400).send();
 	}
 	body.id = todosId++;
@@ -64,28 +74,30 @@ app.post('/todos', function(req, res){
 	res.json(body);
 });
 
-app.put('/todos/:id', function(req, res){
+app.put('/todos/:id', function(req, res) {
 	var todoId = parseInt(req.params.id);
 	var body = _.pick(req.body, 'completed', 'description');
-	var matchTodo = _.findWhere(todos,{id:todoId});
+	var matchTodo = _.findWhere(todos, {
+		id: todoId
+	});
 	var validAttributes = {};
 
-	if(!matchTodo){
+	if (!matchTodo) {
 		res.status(404).send("Error while getting data !");
-	}else{
-		if(body.hasOwnProperty('completed') && _.isBoolean(body.completed) && body.hasOwnProperty('description') && body.description.trim().length > 0 && _.isString(body.description) ){
+	} else {
+		if (body.hasOwnProperty('completed') && _.isBoolean(body.completed) && body.hasOwnProperty('description') && body.description.trim().length > 0 && _.isString(body.description)) {
 			validAttributes.completed = body.completed;
 			validAttributes.description = body.description;
 			_.extend(matchTodo, validAttributes);
 			res.json(todos);
-		}else if(body.hasOwnProperty('completed') || body.hasOwnProperty('description')){
+		} else if (body.hasOwnProperty('completed') || body.hasOwnProperty('description')) {
 			return res.status(400).send("Getting bad response !");
-		}else{
+		} else {
 			return res.status(404).send("Page not found !");
 		}
 	}
 });
 
-app.listen(PORT,function(){
+app.listen(PORT, function() {
 	console.log('Everything gonna be alright !');
 });
