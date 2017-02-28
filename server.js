@@ -18,7 +18,7 @@ app.get('/todos', function(req, res){
 	res.json(todos);
 });
 
-app.get('/todos/:id', function(req, res){
+app.get('/todos/edit/:id', function(req, res){
 	var todoId = parseInt(req.params.id);
 	var matchTodo = _.findWhere(todos,{id:todoId});
 
@@ -27,6 +27,17 @@ app.get('/todos/:id', function(req, res){
 	}else{
 		res.status(404).send();
 	};
+});
+
+app.delete('/todos/delete/:id', function(req, res){
+	var todoId = parseInt(req.params.id);
+	var matchTodo = _.findWhere(todos,{id:todoId});
+	if(!matchTodo){
+		res.send("Cannot find any data with those ID !");
+	}else{
+		todos = _.without(todos,matchTodo);
+		res.json(todos);
+	}
 });
 
 app.post('/todos', function(req, res){
