@@ -16,10 +16,15 @@ app.get('/', function(req, res){
 
 app.get('/todos', function(req, res){
 	var queryParams = req.query;
+	filteredTodos = todos;
 	if(queryParams.hasOwnProperty('completed') && queryParams.completed === "false" ){
-		var filteredTodos = _.filter(todos, {completed:false});
+		filteredTodos = _.where(todos, {completed:false});
 	}else if((queryParams.hasOwnProperty('completed') && queryParams.completed === "true" )){
-		var filteredTodos = _.filter(todos, {completed:true});
+		filteredTodos = _.where(todos, {completed:true});
+	}
+
+	if(queryParams.hasOwnProperty('q') && queryParams.q.length > 0){
+		filteredTodos = _.filter(todos, function(params){return params.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;});
 	}
 	
 	res.json(filteredTodos);
