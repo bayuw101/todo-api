@@ -16,32 +16,58 @@ app.get('/', function(req, res) {
 
 app.get('/todos', function(req, res) {
 	var queryParams = req.query;
-	filteredTodos = todos;
-	if (queryParams.hasOwnProperty('completed') && queryParams.completed === "false") {
-		filteredTodos = _.where(todos, {
-			completed: false
-		});
-	} else if ((queryParams.hasOwnProperty('completed') && queryParams.completed === "true")) {
-		filteredTodos = _.where(todos, {
-			completed: true
-		});
+	var where = {};
+
+	if (queryParams.hasOwnProperty('completed')) {
+		where.completed = queryParams.completed;
 	}
 
-	if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0) {
-		filteredTodos = _.filter(todos, function(params) {
-			return params.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
-		});
+	if (queryParams.hasOwnProperty('q') && queryParams.q.trim().length > 0) {
+		where.description = {
+			$like: "%" + queryParams.q + "%"
+		};
 	}
 
-	res.json(filteredTodos);
+	db.todo.findAll({
+		where: where
+	}).then(function(todos) {
+		var result = [];
+		todos.forEach(function(todo) {
+			result.push(todo.toJSON());
+		});
+		res.json(result);
+	}).catch(function(e) {
+		res.status(404).send();
+	});
+
+
+	// var queryParams = req.query;
+	// filteredTodos = todos;
+	// if (queryParams.hasOwnProperty('completed') && queryParams.completed === "false") {
+	// 	filteredTodos = _.where(todos, {
+	// 		completed: false
+	// 	});
+	// } else if ((queryParams.hasOwnProperty('completed') && queryParams.completed === "true")) {
+	// 	filteredTodos = _.where(todos, {
+	// 		completed: true
+	// 	});
+	// }
+
+	// if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0) {
+	// 	filteredTodos = _.filter(todos, function(params) {
+	// 		return params.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
+	// 	});
+	// }
+
+	// res.json(filteredTodos);
 });
 
 app.get('/todos/:id', function(req, res) {
 	var todoId = req.params.id;
 	var todo = db.todo.findById(todoId).then(function(todo) {
-		if(!!todo){
+		if (!!todo) {
 			res.json(todo.toJSON());
-		}else{
+		} else {
 			res.status(404).send();
 		}
 	}).catch(function(e) {
