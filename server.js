@@ -56,18 +56,20 @@ app.get('/todos/:id', function(req, res) {
 
 app.delete('/todos/:id', function(req, res) {
 	var todoId = parseInt(req.params.id);
-	
+
 	db.todo.destroy({
-		where : {
-			id : todoId
+		where: {
+			id: todoId
 		}
-	}).then(function(rowsDeleted){
-		if(rowsDeleted <= 0){
-			res.status(404).json({error:"No Data Deleted !"});
-		}else{
+	}).then(function(rowsDeleted) {
+		if (rowsDeleted <= 0) {
+			res.status(404).json({
+				error: "No Data Deleted !"
+			});
+		} else {
 			res.status(204).send();
 		}
-	}).catch(function(e){
+	}).catch(function(e) {
 		res.status(500).send();
 	});
 });
@@ -86,29 +88,32 @@ app.post('/todos', function(req, res) {
 app.put('/todos/:id', function(req, res) {
 	var todoId = parseInt(req.params.id);
 	var body = _.pick(req.body, 'completed', 'description');
-	var matchTodo = _.findWhere(todos, {
-		id: todoId
-	});
-	var validAttributes = {};
 
-	if (!matchTodo) {
-		res.status(404).send("Error while getting data !");
-	} else {
-		if (body.hasOwnProperty('completed') && _.isBoolean(body.completed) && body.hasOwnProperty('description') && body.description.trim().length > 0 && _.isString(body.description)) {
-			validAttributes.completed = body.completed;
-			validAttributes.description = body.description;
-			_.extend(matchTodo, validAttributes);
-			res.json(todos);
-		} else if (body.hasOwnProperty('completed') || body.hasOwnProperty('description')) {
-			return res.status(400).send("Getting bad response !");
-		} else {
-			return res.status(404).send("Page not found !");
+	db.todo.update(body, {
+		where: {
+			id: todoId
 		}
-	}
+	}).then(function(todo) {
+		res.json(body);
+	}, function(e) {
+		res.status(400).json(e);
+	}).catch(function(e) {
+		res.status(500).send();
+	});
+});
+
+//usre
+app.post('/users', function(req, res) {
+	var body = _.pick(req.body, 'email', 'password');
+	db.user.create(body).then(function(user){
+		res.json(user.toJSON());
+	}).catch(function(e){
+		res.status(500).send(e);
+	});
 });
 
 db.sequelize.sync({
-	force: false
+	force: true
 }).then(function() {
 	app.listen(PORT, function() {
 		console.log('Everything gonna be alright !');

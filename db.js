@@ -8,13 +8,14 @@ if (env === 'production') {
 } else {
 	sequelize = new Sequelize(undefined, undefined, undefined, {
 		'dialect': 'sqlite',
-		'storage': __dirname + '/data/todo-api-database.sqlite'
+		'storage': __dirname + '/data/todo-database.sqlite'
 	});
 }
 
 var db = {};
 
 db.todo = sequelize.import(__dirname + '/models/todo.js');
+db.user = sequelize.import(__dirname + '/models/user.js');
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 

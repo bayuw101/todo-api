@@ -24,8 +24,8 @@ sequelize.sync({
 	console.log("all is synchronized !");
 
 	Todo.create({
-		title : "surga yang tak dirindukan",
-		availability : false
+		title : false,
+		availability : "dsfsdf"
 	}).then(function(){
 		return Todo.create({
 			title : "Koala Kumal"
