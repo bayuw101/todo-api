@@ -105,11 +105,22 @@ app.put('/todos/:id', function(req, res) {
 //usre
 app.post('/users', function(req, res) {
 	var body = _.pick(req.body, 'email', 'password');
-	db.user.create(body).then(function(user){
+	db.user.create(body).then(function(user) {
 		res.json(user.toPublicJSON());
-	}).catch(function(e){
+	}).catch(function(e) {
 		res.status(500).send(e);
 	});
+});
+
+app.post('/users/login', function(req, res) {
+	var body = _.pick(req.body, 'email', 'password');
+
+	db.user.authencticate(body).then(function(user){
+		res.json(user.toPublicJSON());
+	},function(){
+		res.status(401).send();
+	});
+
 });
 
 db.sequelize.sync({
