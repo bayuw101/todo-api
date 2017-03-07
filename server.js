@@ -102,25 +102,24 @@ app.put('/todos/:id', function(req, res) {
 	});
 });
 
-//usre
-app.post('/users', function(req, res) {
-	var body = _.pick(req.body, 'email', 'password');
-	db.user.create(body).then(function(user) {
-		res.json(user.toPublicJSON());
-	}).catch(function(e) {
+app.post('/users', function(req, res){
+	var body = _.pick(req.body,'email','password');
+
+	db.user.create(body).then(function(user){
+		res.json(user.toJSON());
+	}, function(e){
 		res.status(500).send(e);
 	});
 });
 
-app.post('/users/login', function(req, res) {
+app.post('/users/login', function(req, res){
 	var body = _.pick(req.body, 'email', 'password');
 
-	db.user.authencticate(body).then(function(user){
-		res.json(user.toPublicJSON());
-	},function(){
-		res.status(401).send();
+	db.user.authenticate(body).then(function(user){
+		res.header('Auth',user.generateToken('authentication')).json(user.toJSON());
+	}, function(e){
+		res.status(401).send(e);
 	});
-
 });
 
 db.sequelize.sync({
