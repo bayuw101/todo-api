@@ -51,6 +51,26 @@ module.exports = function(sequelize, DataTypes) {
 						});
 					}
 				});
+			},
+			findByToken: function(token) {
+				return new Promise(function(resolve, reject) {
+					try {
+						var decodeJWT = jwt.verify(token, 'bayuoke');
+						console.log(decodeJWT);
+						var bytes = cryptojs.AES.decrypt(decodeJWT.token, 'okebayu');
+						var tokenData = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+						user.findById(tokenData.id).then(function(user) {
+							console.log('1');
+							resolve(user);
+						}).catch(function(e) {
+							console.log('2');
+							reject();
+						});
+					} catch (e) {
+						console.log('3');
+						reject(e);
+					}
+				});
 			}
 		},
 		instanceMethods: {
@@ -66,7 +86,7 @@ module.exports = function(sequelize, DataTypes) {
 					});
 					var encryptedData = cryptojs.AES.encrypt(stringData, 'okebayu').toString();
 					var token = jwt.sign({
-						token : encryptedData
+						token: encryptedData
 					}, 'bayuoke');
 					return token;
 				} catch (e) {
