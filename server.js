@@ -19,6 +19,8 @@ app.get('/todos', middleware.requireAuthentication, function(req, res) {
 	var queryParams = req.query;
 	var where = {};
 
+	where.userId = parseInt(req.user.get('id'));
+	// console.log(req.user.id);
 	if (queryParams.hasOwnProperty('completed')) {
 		where.completed = queryParams.completed;
 	}
@@ -43,26 +45,36 @@ app.get('/todos', middleware.requireAuthentication, function(req, res) {
 });
 
 app.get('/todos/:id', middleware.requireAuthentication, function(req, res) {
-	var todoId = req.params.id;
-	var todo = db.todo.findById(todoId).then(function(todo) {
+	var todoId = parseInt(req.params.id);
+	var userId = parseInt(req.user.get('id'));
+
+	var where = {
+		id : todoId,
+		userId : userId
+	};
+	var todo = db.todo.findOne({where : where}).then(function(todo) {
 		if (!!todo) {
 			res.json(todo.toJSON());
 		} else {
 			res.status(404).send();
 		}
 	}).catch(function(e) {
+		console.log(e);
 		res.status(500).send();
 	});
 });
 
 app.delete('/todos/:id', middleware.requireAuthentication, function(req, res) {
 	var todoId = parseInt(req.params.id);
+	var userId = parseInt(req.user.get('id'));
 
 	db.todo.destroy({
 		where: {
-			id: todoId
+			id: todoId,
+			userId: userId
 		}
 	}).then(function(rowsDeleted) {
+		console.log('Deleted ROws : ' + rowsDeleted);
 		if (rowsDeleted <= 0) {
 			res.status(404).json({
 				error: "No Data Deleted !"
@@ -91,13 +103,15 @@ app.post('/todos', middleware.requireAuthentication, function(req, res) {
 	});
 });
 
-app.put('/todos/:id', function(req, res) {
+app.put('/todos/:id', middleware.requireAuthentication, function(req, res) {
 	var todoId = parseInt(req.params.id);
+	var userId = parseInt(req.user.get('id'));
 	var body = _.pick(req.body, 'completed', 'description');
 
 	db.todo.update(body, {
 		where: {
-			id: todoId
+			id: todoId,
+			userId: userId
 		}
 	}).then(function(todo) {
 		res.json(body);
