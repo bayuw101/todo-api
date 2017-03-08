@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var _ = require('underscore');
 var db = require('./db.js');
 var middleware = require('./middleware.js')(db);
+
 var app = express();
 var PORT = process.env.PORT || 3000;
 var todos = [];
@@ -76,9 +77,9 @@ app.delete('/todos/:id', middleware.requireAuthentication, function(req, res) {
 
 app.post('/todos', middleware.requireAuthentication, function(req, res) {
 	var body = _.pick(req.body, 'completed', 'description');
-	// body.userId = req.user.id;
+	console.log(req.user);
 	db.todo.create(body).then(function(todo) {
-		// res.json(todo.toJSON());
+		console.log('data saved !');
 		req.user.addTodo(todo).then(function(){
 			return todo.reload();
 		}).then(function(todo){
