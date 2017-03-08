@@ -61,7 +61,7 @@ module.exports = function(sequelize, DataTypes) {
 						var tokenData = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
 						user.findById(tokenData.id).then(function(user) {
 							console.log('1');
-							resolve(user);
+							resolve(user.toJSON());
 						}).catch(function(e) {
 							console.log('2');
 							reject();
